@@ -1,0 +1,97 @@
+#scalar DateTime
+scalar LocalDateTime
+type Query{
+    allArticles(page:Int): [Article]
+#    allArticles(page: Int): WebStoriesDTO!
+    articleById (id: ID!): Article
+#    allArticlesPaginated(page: Int): WebStory
+}
+type Mutation {
+    addArticle(articleInput: ArticleInput!): Article
+    updateArticle(id: ID!, articleInput: ArticleInput!): Article
+    deleteArticle(id: ID!): String
+    #    updateArticle(articleInput: ArticleInput!): Article!
+}
+
+input ArticleInput{
+    title:String
+    mobileHeadline:String
+    summary:String
+    type:String
+    metaDataInput:MetaDataInput!
+    elements:[Int]
+
+}
+input MetaDataInput{
+    creationDate:LocalDateTime
+    createdBy:[KeyValuePairInput]
+    updatedDate:LocalDateTime
+    updatedBy:[KeyValuePairInput]
+    publishedDate:LocalDateTime
+    publishedBy:[KeyValuePairInput]
+    section:[KeyValuePairInput]
+    subSection:[KeyValuePairInput]
+    topic:[KeyValuePairInput]
+    isDeleted: Boolean
+    readByUsers:[KeyValuePairInput]
+    domainId:[Int]
+
+}
+
+type WebStoriesDTO{
+    data:[Article]
+    totalElements:Int
+    totalPages:Int
+    currentPage:Int
+    isFirst:Boolean
+    isLast:Boolean
+    hasNext:Boolean
+    hasPrevious:Boolean
+}
+
+type Article{
+    id:ID
+    title:String
+    mobileHeadline:String
+    summary:String
+    type:String
+    metaData:MetaData
+    elements:[Int]
+}
+
+type ArticleDTO{
+    id:ID
+    title:String
+    mobileHeadline:String
+    summary:String
+    type:String
+    metaData:MetaData
+    elements:[Int]
+
+}
+type MetaData{
+    creationDate:LocalDateTime
+    createdBy:[KeyValuePair]
+    updatedDate:LocalDateTime
+    updatedBy:[KeyValuePair]
+    publishedDate:LocalDateTime
+    publishedBy:[KeyValuePair]
+    section:[KeyValuePair]
+    subSection:[KeyValuePair]
+    topic:[KeyValuePair]
+    isDeleted: Boolean
+    readByUsers:[KeyValuePair]
+    domainId:[Int]
+
+}
+type KeyValuePair{
+    id:ID
+    name:String
+}
+
+input KeyValuePairInput{
+    id:ID!
+    name:String!
+}
+#scalar Date
+
