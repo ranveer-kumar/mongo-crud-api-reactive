@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ArticleDTO {
-    private Long id;
+    private String id;
     private String title;
     private String mobileHeadline;
     private String summary;

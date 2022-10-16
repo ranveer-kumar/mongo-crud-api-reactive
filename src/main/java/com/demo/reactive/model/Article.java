@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 public class Article {
     @Id
-    private Long id;
+    private String id;
     private String title;
     private String mobileHeadline;
     private String summary;

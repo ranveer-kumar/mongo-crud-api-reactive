@@ -4,10 +4,8 @@ import com.demo.reactive.error.ArticleNotFoundException;
 import com.demo.reactive.model.Article;
 import com.demo.reactive.model.ArticleInput;
 import com.demo.reactive.model.ArticleMapper;
-import com.demo.reactive.model.MetaData;
 import com.demo.reactive.repository.ArticleRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,15 +15,18 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static java.util.Comparator.comparing;
 
-@Controller
+@RestController
 @Slf4j
 public class ArticleController {
 
@@ -35,7 +36,7 @@ public class ArticleController {
     private ArticleMapper articleMapper;
 
     @QueryMapping
-    public Mono<Article> articleById(@Argument Long id) {
+    public Mono<Article> articleById(@Argument String id) {
         return this.articleRepository.findById(id)
                 .switchIfEmpty(Mono.error(new ArticleNotFoundException(id)));
     }
@@ -50,41 +51,26 @@ public class ArticleController {
 ////        .switchIfEmpty(Mono.error(new ArticleNotFoundException(id)));
 //    }
 
-    @MutationMapping
-    private Mono<ResponseEntity<Article>> updateArticle(@Argument Long id, @Argument ArticleInput articleInput) {
-        return this.articleRepository.findById(id)
-                .switchIfEmpty(Mono.error(new ArticleNotFoundException(id)))
-                .map(entity -> {
-                    MetaData metaData = new MetaData();
-                    BeanUtils.copyProperties(articleInput.getMetaDataInput(), metaData);
-                    metaData.setCreationDate(articleInput.getMetaDataInput().getCreationDate());
-                    metaData.setUpdatedDate(LocalDateTime.now());
-                    metaData.setPublishedDate(articleInput.getMetaDataInput().getPublishedDate());
-
+    @PutMapping("/article/{id}")
+    private Mono<ResponseEntity<Article>> updateArticle(@PathVariable("id") String id, @RequestBody ArticleInput articleInput) {
+        return articleRepository.findById(id)
+                .flatMap(entity -> {
+                    entity.setId(UUID.randomUUID().toString());
                     entity.setTitle(articleInput.getTitle());
                     entity.setMobileHeadline(articleInput.getMobileHeadline());
                     entity.setSummary(articleInput.getSummary());
                     entity.setElements(articleInput.getElements());
-                    entity.setMetaData(metaData);
+                   // entity.setMetaData(metaData);
                     entity.setType(articleInput.getType());
-                    return entity;
-
+                    return this.articleRepository.save(entity);
                 })
-//                .map(p -> {
-//                    p.setTitle(articleInput.getTitle());
-////                    p.setContent(post.content());
-//                    return p;
-//                })
-                .flatMap(this.articleRepository::save)
-//                .map(data -> noContent().build());
-                .map(article1 ->  new ResponseEntity<>(article1,HttpStatus.OK))
-//                .defaultIfEmpty((new ResponseEntity<>(HttpStatus.NOT_FOUND)));
-                .switchIfEmpty(Mono.just(new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED)));
-
+                .map(article1 ->
+                        new ResponseEntity<>(article1, HttpStatus.OK)
+                );
     }
 
     @MutationMapping
-    public Mono<ResponseEntity<Article>> deleteArticle(@Argument Long id) {
+    public Mono<ResponseEntity<Article>> deleteArticle(@Argument String id) {
 
         return articleRepository.findById(id)
                 .flatMap(article ->
@@ -97,7 +83,7 @@ public class ArticleController {
     }
     @MutationMapping
     private Mono<Article> addArticle(@Argument Article articleInput) {
-        articleInput.setId(System.currentTimeMillis());
+        articleInput.setId(UUID.randomUUID().toString());
         return this.articleRepository.save(articleInput);
     }
 

@@ -7,7 +7,7 @@ import reactor.core.publisher.Flux;
 /**
  * @author ranveerkumar
  */
-public interface ArticleRepository extends ReactiveCrudRepository<Article, Long> {
+public interface ArticleRepository extends ReactiveCrudRepository<Article, String> {
 //Page<WebStory> findAllPageble(Pageable pageable);
 //    Flux<WebStory> findByIdNotNull(Pageable pageable);
     Flux<Article> findByIdNotNull();
